@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background circle -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M100,100m-90,0a90,90 0,1 1,180 0a90,90 0,1 1,-180 0" />
+
+    <!-- Airplane -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M160,100L100,160L40,100L100,70Z" />
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M100,100m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0" />
+
+    <!-- Pin -->
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M100,30L110,50L90,50Z" />
+    <path
+        android:fillColor="#FF5722"
+        android:pathData="M95,50h10v30h-10z" />
+
+    <!-- Routes -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M40,100Q70,70 100,100T160,100" />
+</vector>
