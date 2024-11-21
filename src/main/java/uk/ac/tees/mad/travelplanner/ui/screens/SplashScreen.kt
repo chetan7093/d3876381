@@ -33,9 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import uk.ac.tees.mad.travelplanner.R
 import uk.ac.tees.mad.travelplanner.ui.app_navigation.Screen
 
@@ -54,10 +52,8 @@ fun SplashScreen(navController: NavHostController) {
     LaunchedEffect(key1 = true) {
         startAnimation = true
         delay(4000)
-        withContext(Dispatchers.Main) {
-            navController.navigate(Screen.Login.route) {
-                popUpTo(Screen.Splash.route) { inclusive = true }
-            }
+        navController.navigate(Screen.Login.route) {
+            popUpTo(Screen.Splash.route) { inclusive = true }
         }
     }
 
@@ -88,7 +84,7 @@ fun Splash(alpha: Float, scale: Float) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.travel_logo),
+                    painter = painterResource(id = R.drawable.travel_logo),
                     contentDescription = "Logo",
                     modifier = Modifier
                         .size(200.dp)
