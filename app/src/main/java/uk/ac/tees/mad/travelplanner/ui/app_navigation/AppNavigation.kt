@@ -1,9 +1,13 @@
 package uk.ac.tees.mad.travelplanner.ui.app_navigation
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import uk.ac.tees.mad.travelplanner.ui.screens.LoginScreen
+import uk.ac.tees.mad.travelplanner.ui.screens.SplashScreen
 
 @Composable
 fun AppNavigation() {
@@ -11,6 +15,9 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
             SplashScreen(navController)
+        }
+        composable(Screen.Login.route) {
+            LoginScreen(navController)
         }
     }
 }
