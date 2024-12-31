@@ -55,7 +55,7 @@ fun SplashScreen(navController: NavHostController) {
 
     LaunchedEffect(key1 = true) {
         startAnimation = true
-        delay(4000)
+        delay(2000)
         withContext(Dispatchers.Main) {
             val isLogged = Firebase.auth.currentUser != null
             navController.navigate(if (isLogged) Screen.TripList.route else Screen.Login.route) {
