@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -52,18 +53,11 @@ fun SignUpScreen(navController: NavHostController) {
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.secondary
+                        Color.White
                     )
                 )
             )
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.travel_background),
-            contentDescription = "Travel background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            alpha = 0.3f
-        )
 
         Column(
             modifier = Modifier
@@ -212,9 +206,9 @@ fun SignUpScreen(navController: NavHostController) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Already have an account?", color = Color.White)
+                Text("Already have an account?", color = MaterialTheme.colorScheme.primary)
                 TextButton(onClick = { navController.popBackStack() }) {
-                    Text("Log In", color = MaterialTheme.colorScheme.secondary)
+                    Text("Log In", color = MaterialTheme.colorScheme.primary, textDecoration = TextDecoration.Underline)
                 }
             }
         }

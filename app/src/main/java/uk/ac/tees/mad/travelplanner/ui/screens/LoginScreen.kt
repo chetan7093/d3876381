@@ -68,19 +68,11 @@ fun LoginScreen(navController: NavHostController) {
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.secondary
+                        Color.White
                     )
                 )
             )
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.travel_background),
-            contentDescription = "Travel background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop,
-            alpha = 0.3f
-        )
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -178,9 +170,9 @@ fun LoginScreen(navController: NavHostController) {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Don't have an account?", color = Color.White)
+                Text("Don't have an account?", color = MaterialTheme.colorScheme.primary)
                 TextButton(onClick = { navController.navigate(Screen.Register.route) }) {
-                    Text("Sign Up", color = Color.White, textDecoration = TextDecoration.Underline)
+                    Text("Sign Up", color = MaterialTheme.colorScheme.primary, textDecoration = TextDecoration.Underline)
                 }
             }
         }
