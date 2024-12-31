@@ -1,27 +1,51 @@
 package uk.ac.tees.mad.travelplanner.ui.screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,11 +54,15 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import uk.ac.tees.mad.travelplanner.R
+import uk.ac.tees.mad.travelplanner.ui.app_navigation.Screen
+import uk.ac.tees.mad.travelplanner.viewmodels.AuthUiState
+import uk.ac.tees.mad.travelplanner.viewmodels.AuthViewModel
 
 @Composable
-fun SignUpScreen(navController: NavHostController) {
+fun SignUpScreen(navController: NavHostController, viewModel: AuthViewModel = hiltViewModel()) {
+    val uiState by viewModel.uiState.collectAsState()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -43,6 +71,7 @@ fun SignUpScreen(navController: NavHostController) {
     var isConfirmPasswordVisible by remember { mutableStateOf(false) }
     var isSignUpEnabled by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
@@ -73,6 +102,7 @@ fun SignUpScreen(navController: NavHostController) {
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold
             )
+
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Sign up to start planning your adventures",
@@ -189,14 +219,18 @@ fun SignUpScreen(navController: NavHostController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { /* Handle sign up */ },
-                enabled = isSignUpEnabled,
+                onClick = { viewModel.signUp(name, email, password) },
+                enabled = isSignUpEnabled && uiState !is AuthUiState.Loading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .clip(RoundedCornerShape(16.dp))
             ) {
-                Text("Sign Up", fontSize = 18.sp)
+                if (uiState is AuthUiState.Loading) {
+                    CircularProgressIndicator(color = Color.White)
+                } else {
+                    Text("Sign Up", fontSize = 18.sp)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -208,11 +242,28 @@ fun SignUpScreen(navController: NavHostController) {
             ) {
                 Text("Already have an account?", color = MaterialTheme.colorScheme.primary)
                 TextButton(onClick = { navController.popBackStack() }) {
-                    Text("Log In", color = MaterialTheme.colorScheme.primary, textDecoration = TextDecoration.Underline)
+                    Text(
+                        "Log In",
+                        color = MaterialTheme.colorScheme.primary,
+                        textDecoration = TextDecoration.Underline
+                    )
                 }
             }
         }
+        LaunchedEffect(uiState) {
+            when (uiState) {
+                is AuthUiState.Success -> navController.navigate(Screen.TripList.route)
+                is AuthUiState.Error -> {
+                    Toast.makeText(
+                        context,
+                        (uiState as AuthUiState.Error).message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
+                else -> {}
+            }
+        }
         AnimatedVisibility(
             visible = isSignUpEnabled,
             modifier = Modifier
@@ -221,7 +272,7 @@ fun SignUpScreen(navController: NavHostController) {
         ) {
             Text(
                 "Ready to explore the world!",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )

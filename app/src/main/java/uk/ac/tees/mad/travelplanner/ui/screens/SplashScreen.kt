@@ -33,6 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -55,7 +57,8 @@ fun SplashScreen(navController: NavHostController) {
         startAnimation = true
         delay(4000)
         withContext(Dispatchers.Main) {
-            navController.navigate(Screen.Login.route) {
+            val isLogged = Firebase.auth.currentUser != null
+            navController.navigate(if (isLogged) Screen.TripList.route else Screen.Login.route) {
                 popUpTo(Screen.Splash.route) { inclusive = true }
             }
         }

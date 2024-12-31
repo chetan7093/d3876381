@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
-
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation("androidx.compose.material:material-icons-extended-android:1.7.1")
+
+    implementation( "com.google.accompanist:accompanist-permissions:0.30.1")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.8.0")
