@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import uk.ac.tees.mad.travelplanner.ui.screens.LoginScreen
+import uk.ac.tees.mad.travelplanner.ui.screens.SignUpScreen
 import uk.ac.tees.mad.travelplanner.ui.screens.SplashScreen
 
 @Composable
@@ -18,6 +19,9 @@ fun AppNavigation() {
         }
         composable(Screen.Login.route) {
             LoginScreen(navController)
+        }
+        composable(Screen.Register.route) {
+            SignUpScreen(navController)
         }
     }
 }
