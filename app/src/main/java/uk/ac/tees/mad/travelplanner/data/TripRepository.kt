@@ -4,9 +4,12 @@ import android.graphics.Bitmap
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.travelplanner.data.local.TripDao
 import uk.ac.tees.mad.travelplanner.data.local.TripEntity
+import uk.ac.tees.mad.travelplanner.viewmodels.Trip
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
@@ -60,10 +63,24 @@ class TripRepository(
         }
     }
 
+    fun getAllTrips(): Flow<List<Trip>> = tripDao.getAllTrips().map { entities ->
+        entities.map { it.toTrip() }
+    }
+
+    fun getTripById(id: String): Flow<Trip?> = tripDao.getTripById(id).map { it?.toTrip() }
+
+
     suspend fun syncUnSyncedTrips() {
-        val unSyncedTrips = tripDao.getUnsyncedTrips()
-        unSyncedTrips.forEach { trip ->
-            syncTripToFirestore(trip)
+        if (isNetworkAvailable()) {
+            val unSyncedTrips = tripDao.getUnsyncedTrips()
+            unSyncedTrips.forEach { trip ->
+                syncTripToFirestore(trip)
+            }
         }
+    }
+
+    private fun isNetworkAvailable(): Boolean {
+
+        return true
     }
 }

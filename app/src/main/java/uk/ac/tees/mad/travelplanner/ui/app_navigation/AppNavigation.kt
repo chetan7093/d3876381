@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.travelplanner.ui.app_navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +29,10 @@ fun AppNavigation() {
         }
         composable(Screen.CreateTrip.route) {
             CreateTripScreen(navController)
+        }
+        composable(Screen.TripDetails.route) { entry ->
+            val tripId = entry.arguments?.getString("tripId")
+            Log.d("TRI{", tripId.toString())
         }
     }
 }

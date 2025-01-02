@@ -15,6 +15,7 @@ import javax.inject.Inject
 class CreateTripViewModel @Inject constructor(
     private val repository: TripRepository
 ) : ViewModel() {
+
     private val _createTripStatus = MutableStateFlow<CreateTripStatus>(CreateTripStatus.Idle)
     val createTripStatus: StateFlow<CreateTripStatus> = _createTripStatus.asStateFlow()
 
