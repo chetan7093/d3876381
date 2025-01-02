@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -14,7 +15,7 @@ interface TripDao {
     @Query("SELECT * FROM trips WHERE id = :id")
     fun getTripById(id: String): Flow<TripEntity?>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Upsert
     suspend fun insertTrip(trip: TripEntity)
 
     @Query("UPDATE trips SET isSynced = :isSynced WHERE id = :id")

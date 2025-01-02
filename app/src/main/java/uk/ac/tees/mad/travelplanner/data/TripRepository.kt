@@ -1,15 +1,19 @@
 package uk.ac.tees.mad.travelplanner.data
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.travelplanner.data.local.TripDao
 import uk.ac.tees.mad.travelplanner.data.local.TripEntity
+import uk.ac.tees.mad.travelplanner.utils.isNetworkAvailable
 import uk.ac.tees.mad.travelplanner.viewmodels.Trip
+import uk.ac.tees.mad.travelplanner.viewmodels.toTripEntity
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
@@ -17,7 +21,8 @@ class TripRepository(
     private val tripDao: TripDao,
     auth: FirebaseAuth,
     firestore: FirebaseFirestore,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val context: Context
 ) {
     private val currentUser = auth.currentUser!!
     private val tripsCollection =
@@ -45,7 +50,7 @@ class TripRepository(
         return trip.id
     }
 
-    private suspend fun uploadPhotos(photos: List<Bitmap>): List<String> {
+    suspend fun uploadPhotos(photos: List<Bitmap>): List<String> {
         return photos.mapIndexed { index, bitmap ->
             val baos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
@@ -81,8 +86,11 @@ class TripRepository(
         }
     }
 
-    private fun isNetworkAvailable(): Boolean {
+    private fun isNetworkAvailable(): Boolean =
+        context.isNetworkAvailable()
 
-        return true
+    suspend fun updateTrip(updatedTrip: Trip) {
+        tripDao.insertTrip(updatedTrip.toTripEntity())
     }
 }
+

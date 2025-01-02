@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.travelplanner.data.TripRepository
+import uk.ac.tees.mad.travelplanner.data.local.TripEntity
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,4 +28,15 @@ data class Trip(
     val endDate: Long = 0L,
     val itinerary: String = "",
     val photoUrl: List<String> = emptyList()
+)
+
+fun Trip.toTripEntity() = TripEntity(
+    id = id,
+    startLocation = startLocation,
+    destination = destination,
+    startDate = startDate,
+    endDate = endDate,
+    itinerary = itinerary,
+    photoUrls = photoUrl,
+    isSynced = false
 )

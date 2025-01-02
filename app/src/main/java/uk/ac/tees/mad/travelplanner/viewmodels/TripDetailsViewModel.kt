@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.travelplanner.viewmodels
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class TripDetailsViewModel @Inject constructor(
     private val repository: TripRepository
 ) : ViewModel() {
+
     private val _trip = MutableStateFlow<Trip?>(null)
     val trip: StateFlow<Trip?> = _trip.asStateFlow()
 
@@ -23,5 +25,19 @@ class TripDetailsViewModel @Inject constructor(
                 _trip.value = it
             }
         }
+    }
+
+    fun saveTrip(bitmapList: List<Bitmap>) {
+        _trip.value?.let { trip ->
+            viewModelScope.launch {
+                val uploadPhotos = uploadPhoto(bitmapList)
+                val updatedTrip = trip.copy(photoUrl = uploadPhotos)
+                repository.updateTrip(updatedTrip)
+            }
+        }
+    }
+
+    private suspend fun uploadPhoto(photo: List<Bitmap>): List<String> {
+        return repository.uploadPhotos(photo)
     }
 }

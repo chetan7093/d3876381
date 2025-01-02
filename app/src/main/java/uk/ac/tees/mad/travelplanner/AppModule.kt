@@ -52,7 +52,9 @@ object AppModule {
         tripDao: TripDao,
         auth: FirebaseAuth,
         firestore: FirebaseFirestore,
-        storage: FirebaseStorage
-    ) = TripRepository(tripDao, auth, firestore, storage)
+        storage: FirebaseStorage,
+        @ApplicationContext context: Context
+
+    ) = TripRepository(tripDao, auth, firestore, storage, context)
 
 }
