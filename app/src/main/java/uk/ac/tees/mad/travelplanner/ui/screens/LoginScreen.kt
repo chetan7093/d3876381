@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import uk.ac.tees.mad.travelplanner.ui.app_navigation.Screen
-import uk.ac.tees.mad.travelplanner.viewmodels.AuthUiState
+import uk.ac.tees.mad.travelplanner.viewmodels.UiState
 import uk.ac.tees.mad.travelplanner.viewmodels.AuthViewModel
 
 @Composable
@@ -160,13 +160,13 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = hil
 
             Button(
                 onClick = { viewModel.signIn(email, password) },
-                enabled = isLoginEnabled && uiState !is AuthUiState.Loading,
+                enabled = isLoginEnabled && uiState !is UiState.Loading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
                     .clip(RoundedCornerShape(16.dp))
             ) {
-                if (uiState is AuthUiState.Loading) {
+                if (uiState is UiState.Loading) {
                     CircularProgressIndicator(color = Color.White)
                 } else {
                     Text("Log In", fontSize = 18.sp)
@@ -207,11 +207,11 @@ fun LoginScreen(navController: NavHostController, viewModel: AuthViewModel = hil
 
         LaunchedEffect(uiState) {
             when (uiState) {
-                is AuthUiState.Success -> navController.navigate(Screen.TripList.route)
-                is AuthUiState.Error -> {
+                is UiState.Success -> navController.navigate(Screen.TripList.route)
+                is UiState.Error -> {
                     Toast.makeText(
                         context,
-                        (uiState as AuthUiState.Error).message,
+                        (uiState as UiState.Error).message,
                         Toast.LENGTH_SHORT
                     ).show()
                 }

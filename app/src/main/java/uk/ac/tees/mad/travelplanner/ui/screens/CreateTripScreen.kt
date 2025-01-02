@@ -2,6 +2,7 @@ package uk.ac.tees.mad.travelplanner.ui.screens
 
 import android.Manifest
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -28,11 +28,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +46,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,17 +59,21 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import uk.ac.tees.mad.travelplanner.utils.CurrentSelectableDates
+import uk.ac.tees.mad.travelplanner.viewmodels.CreateTripStatus
+import uk.ac.tees.mad.travelplanner.viewmodels.CreateTripViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -75,7 +81,12 @@ import java.util.Locale
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class
 )
 @Composable
-fun CreateTripScreen(navController: NavHostController) {
+fun CreateTripScreen(
+    navController: NavHostController,
+    viewModel: CreateTripViewModel = hiltViewModel()
+) {
+    val createTripStatus by viewModel.createTripStatus.collectAsState()
+
     var destination by remember { mutableStateOf("") }
     var itinerary by remember { mutableStateOf("") }
     var tripPhoto by remember { mutableStateOf(emptyList<Bitmap>()) }
@@ -89,6 +100,7 @@ fun CreateTripScreen(navController: NavHostController) {
     )
 
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
@@ -267,7 +279,9 @@ fun CreateTripScreen(navController: NavHostController) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "delete",
-                                modifier = Modifier.padding(4.dp).size(24.dp)
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(24.dp)
                             )
                         }
                     }
@@ -279,13 +293,24 @@ fun CreateTripScreen(navController: NavHostController) {
 
             Button(
                 onClick = {
-
+                    viewModel.createTrip(
+                        destination,
+                        startDatePickerState.selectedDateMillis!!,
+                        endDatePickerState.selectedDateMillis!!,
+                        itinerary,
+                        tripPhoto
+                    )
                 },
+                enabled = destination.isNotEmpty() && startDatePickerState.selectedDateMillis != null && endDatePickerState.selectedDateMillis != null && itinerary.isNotEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
             ) {
-                Text("Create Trip", fontSize = 18.sp)
+                if (createTripStatus is CreateTripStatus.Loading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                } else {
+                    Text("Create Trip", fontSize = 18.sp)
+                }
             }
         }
 
@@ -327,6 +352,25 @@ fun CreateTripScreen(navController: NavHostController) {
                     state = endDatePickerState
 
                 )
+            }
+        }
+        LaunchedEffect(key1 = createTripStatus) {
+            when (createTripStatus) {
+                is CreateTripStatus.Success -> {
+                    navController.popBackStack()
+                }
+
+                is CreateTripStatus.Error -> {
+                    Toast.makeText(
+                        context,
+                        (createTripStatus as CreateTripStatus.Error).message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                else -> {
+
+                }
             }
         }
     }

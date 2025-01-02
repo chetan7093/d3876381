@@ -14,16 +14,16 @@ class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Initial)
+    private val _uiState = MutableStateFlow<UiState>(UiState.Initial)
     val uiState = _uiState.asStateFlow()
 
     fun signUp(name: String, email: String, password: String) {
         viewModelScope.launch {
-            _uiState.value = AuthUiState.Loading
+            _uiState.value = UiState.Loading
             val result = authRepository.signUp(name, email, password)
             _uiState.value = when {
-                result.isSuccess -> AuthUiState.Success
-                else -> AuthUiState.Error(
+                result.isSuccess -> UiState.Success
+                else -> UiState.Error(
                     result.exceptionOrNull()?.message ?: "Unknown error occurred"
                 )
             }
@@ -32,11 +32,11 @@ class AuthViewModel @Inject constructor(
 
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
-            _uiState.value = AuthUiState.Loading
+            _uiState.value = UiState.Loading
             val result = authRepository.signIn(email, password)
             _uiState.value = when {
-                result.isSuccess -> AuthUiState.Success
-                else -> AuthUiState.Error(
+                result.isSuccess -> UiState.Success
+                else -> UiState.Error(
                     result.exceptionOrNull()?.message ?: "Unknown error occurred"
                 )
             }
@@ -44,9 +44,9 @@ class AuthViewModel @Inject constructor(
     }
 }
 
-sealed class AuthUiState {
-    object Initial : AuthUiState()
-    object Loading : AuthUiState()
-    object Success : AuthUiState()
-    data class Error(val message: String) : AuthUiState()
+sealed class UiState {
+    object Initial : UiState()
+    object Loading : UiState()
+    object Success : UiState()
+    data class Error(val message: String) : UiState()
 }
