@@ -31,8 +31,8 @@ fun AppNavigation() {
             CreateTripScreen(navController)
         }
         composable(Screen.TripDetails.route) { entry ->
-            val tripId = entry.arguments?.getString("tripId")
-            Log.d("TRI{", tripId.toString())
+            val tripId = entry.arguments?.getString("tripId") ?: return@composable
+            Log.d("TRI{", tripId)
         }
     }
 }

@@ -26,6 +26,8 @@ import androidx.navigation.NavHostController
 import uk.ac.tees.mad.travelplanner.ui.app_navigation.Screen
 import uk.ac.tees.mad.travelplanner.viewmodels.Trip
 import uk.ac.tees.mad.travelplanner.viewmodels.TripListViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,8 +72,9 @@ fun TripListItem(trip: Trip, onClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = trip.destination, style = MaterialTheme.typography.headlineSmall)
+            val dateFormat = SimpleDateFormat("dd/MMM/yyyy", Locale.getDefault())
             Text(
-                text = "${trip.startDate} - ${trip.endDate}",
+                text = "${dateFormat.format(trip.startDate)} - ${dateFormat.format(trip.endDate)}",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
