@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.travelplanner.data
 
 import android.graphics.Bitmap
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
@@ -11,12 +12,21 @@ import java.util.UUID
 
 class TripRepository(
     private val tripDao: TripDao,
-    private val firestore: FirebaseFirestore,
+    auth: FirebaseAuth,
+    firestore: FirebaseFirestore,
     private val storage: FirebaseStorage
 ) {
-    private val tripsCollection = firestore.collection("trips")
+    private val currentUser = auth.currentUser!!
+    private val tripsCollection =
+        firestore.collection("users").document(currentUser.uid).collection("trips")
 
-    suspend fun createTrip(destination: String, startDate: Long, endDate: Long, itinerary: String, photos: List<Bitmap>): String {
+    suspend fun createTrip(
+        destination: String,
+        startDate: Long,
+        endDate: Long,
+        itinerary: String,
+        photos: List<Bitmap>
+    ): String {
         val photoUrls = uploadPhotos(photos)
         val trip = TripEntity(
             destination = destination,
