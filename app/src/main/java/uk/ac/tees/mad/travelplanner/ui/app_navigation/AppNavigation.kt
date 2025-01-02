@@ -9,6 +9,7 @@ import uk.ac.tees.mad.travelplanner.ui.screens.CreateTripScreen
 import uk.ac.tees.mad.travelplanner.ui.screens.LoginScreen
 import uk.ac.tees.mad.travelplanner.ui.screens.SignUpScreen
 import uk.ac.tees.mad.travelplanner.ui.screens.SplashScreen
+import uk.ac.tees.mad.travelplanner.ui.screens.TripDetailsScreen
 import uk.ac.tees.mad.travelplanner.ui.screens.TripListScreen
 
 @Composable
@@ -32,7 +33,7 @@ fun AppNavigation() {
         }
         composable(Screen.TripDetails.route) { entry ->
             val tripId = entry.arguments?.getString("tripId") ?: return@composable
-            Log.d("TRI{", tripId)
+            TripDetailsScreen(tripId = tripId, navController)
         }
     }
 }

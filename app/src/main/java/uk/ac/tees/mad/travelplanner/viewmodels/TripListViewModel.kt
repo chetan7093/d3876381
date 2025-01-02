@@ -21,6 +21,7 @@ class TripListViewModel @Inject constructor(private val repository: TripReposito
 
 data class Trip(
     val id: String = "",
+    val startLocation: String = "",
     val destination: String = "",
     val startDate: Long = 0L,
     val endDate: Long = 0L,

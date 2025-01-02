@@ -1,7 +1,9 @@
 package uk.ac.tees.mad.travelplanner.ui.screens
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.location.Geocoder
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -70,13 +73,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.ac.tees.mad.travelplanner.utils.CurrentSelectableDates
 import uk.ac.tees.mad.travelplanner.viewmodels.CreateTripStatus
 import uk.ac.tees.mad.travelplanner.viewmodels.CreateTripViewModel
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@SuppressLint("MissingPermission")
 @OptIn(
     ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class
 )
@@ -88,6 +99,7 @@ fun CreateTripScreen(
     val createTripStatus by viewModel.createTripStatus.collectAsState()
 
     var destination by remember { mutableStateOf("") }
+    var startLocation by remember { mutableStateOf("") }
     var itinerary by remember { mutableStateOf("") }
     var tripPhoto by remember { mutableStateOf(emptyList<Bitmap>()) }
 
@@ -122,6 +134,57 @@ fun CreateTripScreen(
         }
     }
 
+    // Location permission and fetching location
+    val locationPermissionState = rememberMultiplePermissionsState(
+        listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    val getCurrentLocation: () -> Unit = {
+        if (
+            locationPermissionState.permissions.map {
+                it.status.isGranted
+            }.contains(true)
+        ) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    // UsING reverse geocoding to get address from lat/lng
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val geocoder = Geocoder(context)
+                            val addresses = geocoder.getFromLocation(it.latitude, it.longitude, 1)
+                            if (!addresses.isNullOrEmpty()) {
+                                val address =
+                                    "${addresses[0].locality}, ${addresses[0].countryName}"
+                                withContext(Dispatchers.Main) {
+                                    startLocation = address
+                                }
+                            } else {
+                                withContext(Dispatchers.Main) {
+                                    startLocation =
+                                        "Lat: ${location.latitude}, Lng: ${location.longitude}"
+                                }
+                            }
+                        } catch (e: IOException) {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    "Failed to get address, please try again.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            locationPermissionState.launchMultiplePermissionRequest()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(title = { }, navigationIcon = {
@@ -145,7 +208,27 @@ fun CreateTripScreen(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-
+            OutlinedTextField(
+                value = startLocation,
+                onValueChange = { startLocation = it },
+                label = { Text("Start Location") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
+                trailingIcon = {
+                    IconButton(onClick = getCurrentLocation) {
+                        Icon(
+                            imageVector = Icons.Default.MyLocation,
+                            contentDescription = "Use location"
+                        )
+                    }
+                }
+            )
             OutlinedTextField(
                 value = destination,
                 onValueChange = { destination = it },
@@ -294,6 +377,7 @@ fun CreateTripScreen(
             Button(
                 onClick = {
                     viewModel.createTrip(
+                        startLocation,
                         destination,
                         startDatePickerState.selectedDateMillis!!,
                         endDatePickerState.selectedDateMillis!!,
@@ -301,7 +385,7 @@ fun CreateTripScreen(
                         tripPhoto
                     )
                 },
-                enabled = destination.isNotEmpty() && startDatePickerState.selectedDateMillis != null && endDatePickerState.selectedDateMillis != null && itinerary.isNotEmpty(),
+                enabled = startLocation.isNotEmpty() && destination.isNotEmpty() && startDatePickerState.selectedDateMillis != null && endDatePickerState.selectedDateMillis != null && itinerary.isNotEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)

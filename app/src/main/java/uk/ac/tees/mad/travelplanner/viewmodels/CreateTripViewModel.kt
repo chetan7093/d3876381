@@ -20,6 +20,7 @@ class CreateTripViewModel @Inject constructor(
     val createTripStatus: StateFlow<CreateTripStatus> = _createTripStatus.asStateFlow()
 
     fun createTrip(
+        startLocation: String,
         destination: String,
         startDate: Long,
         endDate: Long,
@@ -30,7 +31,7 @@ class CreateTripViewModel @Inject constructor(
             _createTripStatus.value = CreateTripStatus.Loading
             try {
                 val tripId =
-                    repository.createTrip(destination, startDate, endDate, itinerary, photos)
+                    repository.createTrip(startLocation,destination, startDate, endDate, itinerary, photos)
                 _createTripStatus.value = CreateTripStatus.Success(tripId)
             } catch (e: Exception) {
                 _createTripStatus.value =

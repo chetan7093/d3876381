@@ -8,6 +8,7 @@ import java.util.UUID
 @Entity(tableName = "trips")
 data class TripEntity(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val startLocation: String,
     val destination: String,
     val startDate: Long,
     val endDate: Long,
@@ -17,6 +18,7 @@ data class TripEntity(
 ) {
     fun toTrip() = Trip(
         id = this.id,
+        startLocation = this.startLocation,
         destination = this.destination,
         startDate = this.startDate,
         endDate = this.endDate,

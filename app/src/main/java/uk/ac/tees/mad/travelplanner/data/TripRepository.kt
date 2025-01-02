@@ -24,6 +24,7 @@ class TripRepository(
         firestore.collection("users").document(currentUser.uid).collection("trips")
 
     suspend fun createTrip(
+        startLocation: String,
         destination: String,
         startDate: Long,
         endDate: Long,
@@ -32,6 +33,7 @@ class TripRepository(
     ): String {
         val photoUrls = uploadPhotos(photos)
         val trip = TripEntity(
+            startLocation = startLocation,
             destination = destination,
             startDate = startDate,
             endDate = endDate,
