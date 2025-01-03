@@ -2,6 +2,7 @@ package uk.ac.tees.mad.travelplanner.data
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -81,6 +82,7 @@ class TripRepository(
         if (isNetworkAvailable()) {
             val unSyncedTrips = tripDao.getUnsyncedTrips()
             unSyncedTrips.forEach { trip ->
+                Log.d("SYNC", "Network is available, hence syncing")
                 syncTripToFirestore(trip)
             }
         }
