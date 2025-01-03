@@ -44,7 +44,8 @@ class TripRepository(
             startDate = startDate,
             endDate = endDate,
             itinerary = itinerary,
-            photoUrls = photoUrls
+            photoUrls = photoUrls,
+            userId = currentUser.uid
         )
         tripDao.insertTrip(trip)
         syncTripToFirestore(trip)
@@ -71,7 +72,7 @@ class TripRepository(
         }
     }
 
-    fun getAllTrips(): Flow<List<Trip>> = tripDao.getAllTrips().map { entities ->
+    fun getAllTrips(): Flow<List<Trip>> = tripDao.getAllTrips(currentUser.uid).map { entities ->
         entities.map { it.toTrip() }
     }
 
@@ -80,7 +81,7 @@ class TripRepository(
 
     suspend fun syncUnSyncedTrips() {
         if (isNetworkAvailable()) {
-            val unSyncedTrips = tripDao.getUnsyncedTrips()
+            val unSyncedTrips = tripDao.getUnsyncedTrips(currentUser.uid)
             unSyncedTrips.forEach { trip ->
                 Log.d("SYNC", "Network is available, hence syncing")
                 syncTripToFirestore(trip)

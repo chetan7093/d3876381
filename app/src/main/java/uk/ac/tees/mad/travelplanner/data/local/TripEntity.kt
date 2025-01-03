@@ -14,7 +14,8 @@ data class TripEntity(
     val endDate: Long,
     val itinerary: String,
     val photoUrls: List<String>,
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    val userId: String
 ) {
     fun toTrip() = Trip(
         id = this.id,

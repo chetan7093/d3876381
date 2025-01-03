@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -62,10 +64,25 @@ fun TripListScreen(
                     }) {
                         Icon(Icons.Default.Add, contentDescription = "Add Trip")
                     }
+                    IconButton(onClick = {
+                        navController.navigate(Screen.Profile.route)
+                    }) {
+                        Icon(Icons.Default.Person, contentDescription = "Profile")
+                    }
                 }
             )
         }
     ) { pad ->
+        if (trips.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(pad),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "No trips created", style = MaterialTheme.typography.labelSmall)
+            }
+        }
         LazyColumn(Modifier.padding(pad)) {
             items(trips) { trip ->
                 TripListItem(
