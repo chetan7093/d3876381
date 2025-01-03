@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,13 +20,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -44,10 +40,6 @@ fun ProfileScreen(
 ) {
     val user by viewModel.user.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.loadUserProfile()
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,11 +47,6 @@ fun ProfileScreen(
                 actions = {
                     IconButton(onClick = { navController.navigate(Screen.EditProfile.route) }) {
                         Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(imageVector = Icons.Default.ChevronLeft, contentDescription = "back")
                     }
                 }
             )
@@ -76,11 +63,9 @@ fun ProfileScreen(
                 painter = rememberAsyncImagePainter(user?.profileUrl),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)),
-                contentScale = ContentScale.Crop
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f))
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -102,7 +87,7 @@ fun ProfileScreen(
             Button(
                 onClick = {
                     viewModel.logout()
-                    navController.navigate(Screen.Login.route) {
+                    navController.navigate("login") {
                         popUpTo(navController.graph.startDestinationId) {
                             inclusive = true
                         }

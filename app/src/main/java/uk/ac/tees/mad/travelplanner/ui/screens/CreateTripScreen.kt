@@ -4,8 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.location.Geocoder
-import android.net.Uri
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,7 +34,6 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -105,7 +102,6 @@ fun CreateTripScreen(
     var startLocation by remember { mutableStateOf("") }
     var itinerary by remember { mutableStateOf("") }
     var tripPhoto by remember { mutableStateOf(emptyList<Bitmap>()) }
-    var showPhotoDialog by remember { mutableStateOf(false) }
 
     val startDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis(),
@@ -145,17 +141,6 @@ fun CreateTripScreen(
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
-
-
-    // Photo picker launcher for picking from gallery
-    val requestGalleryLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let {
-            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-            tripPhoto = tripPhoto + bitmap
-        }
-    }
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
     val getCurrentLocation: () -> Unit = {
@@ -329,7 +314,11 @@ fun CreateTripScreen(
                                 RoundedCornerShape(8.dp)
                             )
                             .clickable {
-                                showPhotoDialog = true
+                                if (cameraPermissionState.status.isGranted) {
+                                    requestCameraLauncher.launch(null)
+                                } else {
+                                    cameraPermissionState.launchPermissionRequest()
+                                }
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -448,33 +437,6 @@ fun CreateTripScreen(
 
                 )
             }
-        }
-        if (showPhotoDialog) {
-            AlertDialog(
-                onDismissRequest = { showPhotoDialog = false },
-                title = { Text("Add Photo") },
-                text = { Text("Choose an option to add a new trip photo.") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showPhotoDialog = false
-                        if (cameraPermissionState.status.isGranted) {
-                            requestCameraLauncher.launch(null)
-                        } else {
-                            cameraPermissionState.launchPermissionRequest()
-                        }
-                    }) {
-                        Text("Camera")
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showPhotoDialog = false
-                        requestGalleryLauncher.launch("image/*")
-                    }) {
-                        Text("Gallery")
-                    }
-                }
-            )
         }
         LaunchedEffect(key1 = createTripStatus) {
             when (createTripStatus) {

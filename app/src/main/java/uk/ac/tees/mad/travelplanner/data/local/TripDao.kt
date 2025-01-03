@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TripDao {
-    @Query("SELECT * FROM trips WHERE userId=:userId")
-    fun getAllTrips(userId: String): Flow<List<TripEntity>>
+    @Query("SELECT * FROM trips")
+    fun getAllTrips(): Flow<List<TripEntity>>
 
     @Query("SELECT * FROM trips WHERE id = :id")
     fun getTripById(id: String): Flow<TripEntity?>
@@ -21,6 +21,6 @@ interface TripDao {
     @Query("UPDATE trips SET isSynced = :isSynced WHERE id = :id")
     suspend fun updateTripSyncStatus(id: String, isSynced: Boolean)
 
-    @Query("SELECT * FROM trips WHERE isSynced = 0 and userId=:userId")
-    suspend fun getUnsyncedTrips(userId: String): List<TripEntity>
+    @Query("SELECT * FROM trips WHERE isSynced = 0")
+    suspend fun getUnsyncedTrips(): List<TripEntity>
 }

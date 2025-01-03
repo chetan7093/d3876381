@@ -19,9 +19,11 @@ class ProfileViewModel @Inject constructor(
     private val _user = MutableStateFlow<TPUser?>(null)
     val user: StateFlow<TPUser?> = _user.asStateFlow()
 
+    init {
+        loadUserProfile()
+    }
 
-
-     fun loadUserProfile() {
+    private fun loadUserProfile() {
         viewModelScope.launch {
             userRepository.getCurrentUser().onSuccess { user ->
                 _user.value = user

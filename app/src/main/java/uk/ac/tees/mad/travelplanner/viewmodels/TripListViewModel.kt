@@ -2,8 +2,6 @@ package uk.ac.tees.mad.travelplanner.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -32,17 +30,13 @@ data class Trip(
     val photoUrl: List<String> = emptyList()
 )
 
-fun Trip.toTripEntity(): TripEntity {
-    val currentUser = Firebase.auth.currentUser!!
-    return TripEntity(
-        id = id,
-        startLocation = startLocation,
-        destination = destination,
-        startDate = startDate,
-        endDate = endDate,
-        itinerary = itinerary,
-        photoUrls = photoUrl,
-        isSynced = false,
-        userId = currentUser.uid
-    )
-}
+fun Trip.toTripEntity() = TripEntity(
+    id = id,
+    startLocation = startLocation,
+    destination = destination,
+    startDate = startDate,
+    endDate = endDate,
+    itinerary = itinerary,
+    photoUrls = photoUrl,
+    isSynced = false
+)

@@ -2,7 +2,6 @@ package uk.ac.tees.mad.travelplanner.data
 
 import android.graphics.Bitmap
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
@@ -16,7 +15,7 @@ class AuthRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage
 ) {
-
+    val currentUser = firebaseAuth.currentUser!!
     suspend fun signUp(name: String, email: String, password: String): Result<Unit> = try {
         val userMap = mapOf(
             "name" to name,
@@ -43,7 +42,6 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun getCurrentUser(): Result<TPUser> = try {
-        val currentUser = firebaseAuth.currentUser!!
         val result = firestore.collection("users").document(currentUser.uid).get().await().data
         val user = TPUser(
             name = result?.get("name") as String?,
@@ -69,7 +67,7 @@ class AuthRepository @Inject constructor(
     suspend fun updateCurrentUser(username: String, imageBitmap: Bitmap? = null): Result<Unit> =
         try {
             val uploadedPhotoUrl = uploadPhoto(imageBitmap)
-            val currentUser = firebaseAuth.currentUser!!
+
             firestore.collection("users").document(currentUser.uid).update(
                 mapOf(
                     "image" to uploadedPhotoUrl,

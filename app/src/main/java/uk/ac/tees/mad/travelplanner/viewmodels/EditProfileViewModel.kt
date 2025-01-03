@@ -33,7 +33,9 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
-    suspend fun updateProfile(name: String, profilePicture: Bitmap?): Result<Unit> {
-        return userRepository.updateCurrentUser(name, profilePicture)
+    fun updateProfile(name: String, profilePicture: Bitmap?) {
+        viewModelScope.launch {
+            userRepository.updateCurrentUser(name, profilePicture)
+        }
     }
 }
