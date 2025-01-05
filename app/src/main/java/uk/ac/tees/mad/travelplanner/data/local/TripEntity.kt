@@ -13,16 +13,20 @@ data class TripEntity(
     val startDate: Long,
     val endDate: Long,
     val itinerary: String,
-    val photoUrls: List<String>,
-    val isSynced: Boolean = false
-) {
-    fun toTrip() = Trip(
-        id = this.id,
-        startLocation = this.startLocation,
-        destination = this.destination,
-        startDate = this.startDate,
-        endDate = this.endDate,
-        itinerary = this.itinerary,
-        photoUrl = this.photoUrls
-    )
-}
+    val photoData: List<ByteArray> = emptyList(), // List of image byte arrays
+    val isSynced: Boolean = false,
+    val userId: String
+)
+
+fun TripEntity.toTrip() = Trip(
+    id = this.id,
+    startLocation = this.startLocation,
+    destination = this.destination,
+    startDate = this.startDate,
+    endDate = this.endDate,
+    itinerary = this.itinerary,
+    photoData = this.photoData
+)
+
+
+

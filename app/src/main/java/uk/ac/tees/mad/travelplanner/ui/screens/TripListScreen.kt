@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -51,7 +53,11 @@ fun TripListScreen(
     navController: NavHostController,
     viewModel: TripListViewModel = hiltViewModel()
 ) {
-    val trips by viewModel.trips.collectAsState(initial = emptyList())
+    val trips by viewModel.tripList
+
+    LaunchedEffect(Unit) {
+        viewModel.getAllTrips()
+    }
 
     Scaffold(
         topBar = {
@@ -72,6 +78,19 @@ fun TripListScreen(
             )
         }
     ) { pad ->
+        if (trips.isEmpty()) {
+            LaunchedEffect(Unit) {
+                viewModel
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(pad),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "No trips created", style = MaterialTheme.typography.labelSmall)
+            }
+        }
         LazyColumn(Modifier.padding(pad)) {
             items(trips) { trip ->
                 TripListItem(

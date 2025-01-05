@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.travelplanner.ui.screens
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.provider.MediaStore
@@ -81,7 +82,7 @@ import java.util.Locale
 fun TripDetailsScreen(
     tripId: String,
     navController: NavHostController,
-    viewModel: TripDetailsViewModel = hiltViewModel()
+    viewModel: TripDetailsViewModel = hiltViewModel(),
 ) {
     val trip by viewModel.trip.collectAsState(initial = null)
     val dateFormat = SimpleDateFormat("dd MMMM, yyyy", Locale.getDefault())
@@ -96,26 +97,10 @@ fun TripDetailsScreen(
     }
 
     LaunchedEffect(trip) {
-        if (trip != null && trip?.photoUrl?.isNotEmpty() == true) {
-            launch(Dispatchers.IO) {
-                tripPhotos.clear()
-                val loader = ImageLoader(context)
-                trip?.photoUrl?.forEach { url ->
-                    val request = ImageRequest.Builder(context)
-                        .data(url)
-                        .allowHardware(false)
-                        .build()
-
-                    when (val result = loader.execute(request)) {
-                        is ErrorResult -> {
-                            result.throwable.printStackTrace()
-                        }
-
-                        is SuccessResult -> {
-                            tripPhotos.add((result.drawable as BitmapDrawable).bitmap)
-                        }
-                    }
-                }
+        if (trip != null && trip?.photoData?.isNotEmpty() == true) {
+            tripPhotos.clear()
+            trip?.photoData?.forEach { byteArray ->
+                tripPhotos.add(BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size))
             }
         }
     }
@@ -264,12 +249,15 @@ fun TripDetailsScreen(
                     ) {
                         Image(
                             bitmap = photo.asImageBitmap(),
-                            contentDescription = "New Trip Photo",
+                            contentDescription = "Trip Photo",
                             modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surface),
                             contentScale = ContentScale.Crop
                         )
+
                         Box(
                             modifier = Modifier
                                 .height(30.dp)

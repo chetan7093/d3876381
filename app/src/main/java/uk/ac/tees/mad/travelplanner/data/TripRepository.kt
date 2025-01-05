@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import uk.ac.tees.mad.travelplanner.data.local.TripDao
 import uk.ac.tees.mad.travelplanner.data.local.TripEntity
+import uk.ac.tees.mad.travelplanner.data.local.toTrip
 import uk.ac.tees.mad.travelplanner.utils.isNetworkAvailable
 import uk.ac.tees.mad.travelplanner.viewmodels.Trip
 import uk.ac.tees.mad.travelplanner.viewmodels.toTripEntity
@@ -20,10 +21,10 @@ import java.util.UUID
 
 class TripRepository(
     private val tripDao: TripDao,
-    auth: FirebaseAuth,
-    firestore: FirebaseFirestore,
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
     private val storage: FirebaseStorage,
-    private val context: Context
+    private val context: Context,
 ) {
     private val currentUser = auth.currentUser!!
     private val tripsCollection =
@@ -35,32 +36,51 @@ class TripRepository(
         startDate: Long,
         endDate: Long,
         itinerary: String,
-        photos: List<Bitmap>
+        photos: List<ByteArray>,
     ): String {
-        val photoUrls = uploadPhotos(photos)
         val trip = TripEntity(
             startLocation = startLocation,
             destination = destination,
             startDate = startDate,
             endDate = endDate,
             itinerary = itinerary,
-            photoUrls = photoUrls
+            photoData = photos,
+            userId = currentUser.uid
         )
         tripDao.insertTrip(trip)
         syncTripToFirestore(trip)
         return trip.id
     }
 
-    suspend fun uploadPhotos(photos: List<Bitmap>): List<String> {
-        return photos.mapIndexed { index, bitmap ->
-            val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-            val data = baos.toByteArray()
-            val photoRef = storage.reference.child("trip_photos/${UUID.randomUUID()}.jpg")
-            photoRef.putBytes(data).await()
-            photoRef.downloadUrl.await().toString()
+
+    suspend fun addFromFirebaseToLocal(): Result<Unit> {
+        return try {
+            val result =
+                firestore.collection("users").document(currentUser.uid).collection("trips").get()
+                    .await()
+            if (!result.isEmpty) {
+                result.documents.forEach { dataRes ->
+                    val data = dataRes.data
+                    val trip = TripEntity(
+                        id = dataRes.id,
+                        startLocation = data?.get("startLocation") as String,
+                        destination = data["destination"] as String,
+                        startDate = data["startDate"] as Long,
+                        endDate = data["endDate"] as Long,
+                        itinerary = data["itinerary"] as String,
+                        isSynced = true,
+                        userId = currentUser.uid
+                    )
+                    tripDao.insertTrip(trip)
+                }
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
         }
     }
+
 
     private suspend fun syncTripToFirestore(trip: TripEntity) {
         try {
@@ -71,16 +91,18 @@ class TripRepository(
         }
     }
 
-    fun getAllTrips(): Flow<List<Trip>> = tripDao.getAllTrips().map { entities ->
-        entities.map { it.toTrip() }
-    }
+    fun getAllTrips(): Flow<List<Trip>> =
+        tripDao.getAllTrips(currentUser.uid).map { entities ->
+            entities.map { it.toTrip() }
+        }
+
 
     fun getTripById(id: String): Flow<Trip?> = tripDao.getTripById(id).map { it?.toTrip() }
 
 
     suspend fun syncUnSyncedTrips() {
         if (isNetworkAvailable()) {
-            val unSyncedTrips = tripDao.getUnsyncedTrips()
+            val unSyncedTrips = tripDao.getUnsyncedTrips(currentUser.uid)
             unSyncedTrips.forEach { trip ->
                 Log.d("SYNC", "Network is available, hence syncing")
                 syncTripToFirestore(trip)
@@ -88,7 +110,7 @@ class TripRepository(
         }
     }
 
-    private fun isNetworkAvailable(): Boolean =
+    fun isNetworkAvailable(): Boolean =
         context.isNetworkAvailable()
 
     suspend fun updateTrip(updatedTrip: Trip) {

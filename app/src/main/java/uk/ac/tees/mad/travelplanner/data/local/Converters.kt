@@ -5,15 +5,25 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 class Converters {
+    private val gson = Gson()
 
     @TypeConverter
-    fun fromString(value: String): List<String> {
-        val listType = object : TypeToken<List<String>>() {}.type
-        return Gson().fromJson(value, listType)
+    fun fromPhotoDataList(photoData: List<ByteArray>?): String? {
+        return photoData?.map { it.toBase64() }?.let { gson.toJson(it) }
     }
 
     @TypeConverter
-    fun fromList(list: List<String>): String {
-        return Gson().toJson(list)
+    fun toPhotoDataList(data: String?): List<ByteArray>? {
+        return data?.let {
+            val listType = object : TypeToken<List<String>>() {}.type
+            gson.fromJson<List<String>>(it, listType).map { it.fromBase64() }
+        }
     }
+
+    private fun ByteArray.toBase64(): String =
+        android.util.Base64.encodeToString(this, android.util.Base64.DEFAULT)
+
+    private fun String.fromBase64(): ByteArray =
+        android.util.Base64.decode(this, android.util.Base64.DEFAULT)
+
 }

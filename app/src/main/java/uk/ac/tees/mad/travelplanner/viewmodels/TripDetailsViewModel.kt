@@ -1,6 +1,7 @@
 package uk.ac.tees.mad.travelplanner.viewmodels
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import uk.ac.tees.mad.travelplanner.data.TripRepository
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,17 +29,17 @@ class TripDetailsViewModel @Inject constructor(
         }
     }
 
-    fun saveTrip(bitmapList: List<Bitmap>) {
-        _trip.value?.let { trip ->
-            viewModelScope.launch {
-                val uploadPhotos = uploadPhoto(bitmapList)
-                val updatedTrip = trip.copy(photoUrl = uploadPhotos)
+    fun saveTrip(photos: List<Bitmap>) {
+        viewModelScope.launch {
+            val photoData = photos.map { bitmap ->
+                ByteArrayOutputStream().apply {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, this)
+                }.toByteArray()
+            }
+            trip.value?.let {
+                val updatedTrip = it.copy(photoData = photoData)
                 repository.updateTrip(updatedTrip)
             }
         }
-    }
-
-    private suspend fun uploadPhoto(photo: List<Bitmap>): List<String> {
-        return repository.uploadPhotos(photo)
     }
 }

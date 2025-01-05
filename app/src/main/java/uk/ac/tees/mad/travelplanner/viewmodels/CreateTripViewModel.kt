@@ -25,7 +25,7 @@ class CreateTripViewModel @Inject constructor(
         startDate: Long,
         endDate: Long,
         itinerary: String,
-        photos: List<Bitmap>
+        photos: List<ByteArray>
     ) {
         viewModelScope.launch {
             _createTripStatus.value = CreateTripStatus.Loading

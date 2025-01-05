@@ -3,7 +3,10 @@ package uk.ac.tees.mad.travelplanner.ui.screens
 import android.Manifest
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Geocoder
+import android.net.Uri
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,6 +37,7 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -83,6 +87,7 @@ import kotlinx.coroutines.withContext
 import uk.ac.tees.mad.travelplanner.utils.CurrentSelectableDates
 import uk.ac.tees.mad.travelplanner.viewmodels.CreateTripStatus
 import uk.ac.tees.mad.travelplanner.viewmodels.CreateTripViewModel
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -94,14 +99,15 @@ import java.util.Locale
 @Composable
 fun CreateTripScreen(
     navController: NavHostController,
-    viewModel: CreateTripViewModel = hiltViewModel()
+    viewModel: CreateTripViewModel = hiltViewModel(),
 ) {
     val createTripStatus by viewModel.createTripStatus.collectAsState()
 
     var destination by remember { mutableStateOf("") }
     var startLocation by remember { mutableStateOf("") }
     var itinerary by remember { mutableStateOf("") }
-    var tripPhoto by remember { mutableStateOf(emptyList<Bitmap>()) }
+    var tripPhoto by remember { mutableStateOf(emptyList<ByteArray>()) }
+    var showPhotoDialog by remember { mutableStateOf(false) }
 
     val startDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis(),
@@ -124,7 +130,10 @@ fun CreateTripScreen(
         ActivityResultContracts.TakePicturePreview()
     ) { bitmap: Bitmap? ->
         bitmap?.let {
-            tripPhoto = tripPhoto + it
+            val byteArray = ByteArrayOutputStream().apply {
+                it.compress(Bitmap.CompressFormat.JPEG, 100, this)
+            }.toByteArray()
+            tripPhoto = tripPhoto + byteArray
         }
     }
 
@@ -141,6 +150,21 @@ fun CreateTripScreen(
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
+
+
+    // Photo picker launcher for picking from gallery
+    val requestGalleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+            val byteArray = ByteArrayOutputStream().apply {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, this)
+            }.toByteArray()
+            tripPhoto = tripPhoto + byteArray
+        }
+    }
+
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
     val getCurrentLocation: () -> Unit = {
@@ -314,11 +338,7 @@ fun CreateTripScreen(
                                 RoundedCornerShape(8.dp)
                             )
                             .clickable {
-                                if (cameraPermissionState.status.isGranted) {
-                                    requestCameraLauncher.launch(null)
-                                } else {
-                                    cameraPermissionState.launchPermissionRequest()
-                                }
+                                showPhotoDialog = true
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -330,6 +350,8 @@ fun CreateTripScreen(
                     }
                 }
                 items(tripPhoto) { photo ->
+                    val photoBitmap =
+                        BitmapFactory.decodeByteArray(photo, 0, photo.size)
                     Column(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
@@ -342,7 +364,7 @@ fun CreateTripScreen(
                     ) {
 
                         Image(
-                            bitmap = photo.asImageBitmap(),
+                            bitmap = photoBitmap.asImageBitmap(),
                             contentDescription = "Trip Photo",
                             modifier = Modifier
                                 .weight(1f)
@@ -437,6 +459,33 @@ fun CreateTripScreen(
 
                 )
             }
+        }
+        if (showPhotoDialog) {
+            AlertDialog(
+                onDismissRequest = { showPhotoDialog = false },
+                title = { Text("Add Photo") },
+                text = { Text("Choose an option to add a new trip photo.") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showPhotoDialog = false
+                        if (cameraPermissionState.status.isGranted) {
+                            requestCameraLauncher.launch(null)
+                        } else {
+                            cameraPermissionState.launchPermissionRequest()
+                        }
+                    }) {
+                        Text("Camera")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showPhotoDialog = false
+                        requestGalleryLauncher.launch("image/*")
+                    }) {
+                        Text("Gallery")
+                    }
+                }
+            )
         }
         LaunchedEffect(key1 = createTripStatus) {
             when (createTripStatus) {

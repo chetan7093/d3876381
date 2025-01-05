@@ -91,7 +91,7 @@ fun Splash(alpha: Float, scale: Float) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(R.drawable.travel_logo),
+                    painter = painterResource(R.drawable.travel_planner),
                     contentDescription = "Logo",
                     modifier = Modifier
                         .size(200.dp)

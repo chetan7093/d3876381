@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "530864584999",
-    "project_id": "travel-planner-2dea7",
-    "storage_bucket": "travel-planner-2dea7.appspot.com"
+    "project_number": "828205227712",
+    "project_id": "travel-planner-f4dd0",
+    "storage_bucket": "ani-info-b03a2.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:530864584999:android:be6e14afa45770eecd5102",
+        "mobilesdk_app_id": "1:828205227712:android:e2a4651f2bae17bc2a1725",
         "android_client_info": {
           "package_name": "uk.ac.tees.mad.travelplanner"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBCxttgh5mxaoCpF1rySGaz7GcvAYpvm4k"
+          "current_key": "AIzaSyC2EmwOQgxb7nIWkyorjOCVxlZhaF1DedA"
         }
       ],
       "services": {

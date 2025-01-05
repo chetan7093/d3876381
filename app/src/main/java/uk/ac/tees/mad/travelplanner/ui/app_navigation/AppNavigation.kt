@@ -1,11 +1,11 @@
 package uk.ac.tees.mad.travelplanner.ui.app_navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import uk.ac.tees.mad.travelplanner.ui.screens.CreateTripScreen
+import uk.ac.tees.mad.travelplanner.ui.screens.EditProfileScreen
 import uk.ac.tees.mad.travelplanner.ui.screens.LoginScreen
 import uk.ac.tees.mad.travelplanner.ui.screens.ProfileScreen
 import uk.ac.tees.mad.travelplanner.ui.screens.SignUpScreen
@@ -40,7 +40,7 @@ fun AppNavigation() {
             ProfileScreen(navController)
         }
         composable(Screen.EditProfile.route) {
-
+            EditProfileScreen(navController)
         }
     }
 }
